@@ -3,6 +3,7 @@ package com.yq.simpleindicator;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
             TextView tv = new TextView(this);
             tv.setText("pager" + (i + 1));
             tv.setTextSize(18);
+            tv.setGravity(Gravity.CENTER);
             tv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             views.add(tv);
         }

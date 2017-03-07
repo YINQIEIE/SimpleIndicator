@@ -10,7 +10,6 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="#44dddddd"
-        android:orientation="horizontal"
         app:indicator_color="@android:color/holo_blue_bright"
         app:item_count="4"
         app:line_color="#dddddd"></com.yq.simpleindicator.SimpleIndicator>
