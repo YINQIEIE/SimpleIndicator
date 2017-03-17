@@ -1,5 +1,6 @@
 package com.yq.simpleindicator;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -22,8 +23,15 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+
 import java.util.List;
 
+/**
+ * 详见洋神博客,此处将三角下表修改为下划线
+ * http://blog.csdn.net/lmj623565791/article/details/42160391
+ *
+ * @author zhy
+ */
 public class SimpleIndicator extends HorizontalScrollView {
     /**
      * 绘制indicator的画笔
@@ -78,11 +86,15 @@ public class SimpleIndicator extends HorizontalScrollView {
 
     private int lineColor = 0x00000000;//中间的线默认透明
 
+    private int selectedColor = 0xFFEE8600;//中间的线默认透明
+
     private Rect rect;
 
     private LinearLayout linearLayout;
 
     private String TAG = this.getClass().getSimpleName();
+
+    private ValueAnimator animator;//滑动动画
 
     public SimpleIndicator(Context context) {
 
@@ -125,6 +137,8 @@ public class SimpleIndicator extends HorizontalScrollView {
         indicatorColor = a.getColor(R.styleable.ViewPagerIndicator_indicator_color, indicatorColor);
 
         lineColor = a.getColor(R.styleable.ViewPagerIndicator_line_color, lineColor);
+
+        selectedColor = a.getColor(R.styleable.ViewPagerIndicator_selected_text_color, selectedColor);
 
         if (mTabVisibleCount < 0) mTabVisibleCount = COUNT_DEFAULT_TAB;
 
@@ -230,6 +244,8 @@ public class SimpleIndicator extends HorizontalScrollView {
             setItemClickEvent();
         }
 
+        highLightTextView(0);
+
     }
 
     /**
@@ -306,7 +322,7 @@ public class SimpleIndicator extends HorizontalScrollView {
         // 设置当前页
         mViewPager.setCurrentItem(pos);
         // 高亮
-        highLightTextView(pos);
+//        highLightTextView(pos);
     }
 
     /**
@@ -320,7 +336,7 @@ public class SimpleIndicator extends HorizontalScrollView {
 
         if (view instanceof TextView) {
 
-            ((TextView) view).setTextColor(Color.parseColor("#EE8600"));
+            ((TextView) view).setTextColor(selectedColor);
 
         }
 
@@ -365,14 +381,36 @@ public class SimpleIndicator extends HorizontalScrollView {
 
                         mViewPager.setCurrentItem(j);
 
+                    } else {
+
+                        resetTextViewColor();
+
+                        highLightTextView(j * 2);
+
+                        scroll(j, 0);
+
                     }
 
-                    scroll(j, 0);
+
+                    if (null != clickListener) clickListener.onClick(j);
 
                 }
             });
 
         }
+    }
+
+    private ClickListener clickListener;
+
+    public void setClickListener(ClickListener clickListener) {
+
+        this.clickListener = clickListener;
+
+    }
+
+    public interface ClickListener {
+
+        void onClick(int pos);
     }
 
     /**
@@ -431,22 +469,19 @@ public class SimpleIndicator extends HorizontalScrollView {
      */
     public void scroll(int position, float offset) {
 
-        /**
-         * <pre>
-         *  0-1:position=0 ;1-0:postion=0;
-         * </pre>
-         */
         // 不断改变偏移量，invalidate
         mTranslationX = getWidth() / mTabVisibleCount * (position + offset);
 
         int tabWidth = getWidth() / mTabVisibleCount;
 
         // 容器滚动，当移动到倒数最后一个的时候，开始滚动
-        if (offset > 0 && position >= (mTabVisibleCount - 2) && linearLayout.getChildCount() / 2 > mTabVisibleCount && position < linearLayout.getChildCount() / 2 - 2) {
+        if (offset >= 0 && position >= (mTabVisibleCount - 2) && linearLayout.getChildCount() / 2 > mTabVisibleCount && position <= linearLayout.getChildCount() / 2 - 2) {
 
             if (mTabVisibleCount != 1) {
 
-                scrollTo((position - (mTabVisibleCount - 2)) * tabWidth + (int) (tabWidth * offset), 0);
+//                scrollTo((position - (mTabVisibleCount - 2)) * tabWidth + (int) (tabWidth * offset), 0);
+
+                startAnimation(position, offset, tabWidth);
 
             } else { // 为count为1时 的特殊处理
 
@@ -457,6 +492,29 @@ public class SimpleIndicator extends HorizontalScrollView {
         }
 
         invalidate();
+    }
+
+    /**
+     * 滑动导航条
+     *
+     * @param position
+     * @param offset
+     * @param tabWidth
+     */
+    private void startAnimation(int position, float offset, int tabWidth) {
+
+        animator = ValueAnimator.ofInt(getScrollX(), (position - (mTabVisibleCount - 2)) * tabWidth + (int) (tabWidth * offset));
+
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+
+                scrollTo((int) animation.getAnimatedValue(), 0);
+
+            }
+        });
+
+        animator.start();
     }
 
     /**
