@@ -4,7 +4,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
@@ -22,7 +21,6 @@ import android.view.WindowManager;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 
 import java.util.List;
 
@@ -75,24 +73,19 @@ public class SimpleIndicator extends HorizontalScrollView {
 
     private int indicatorColor = 0xFFC30D23;//默认红色
 
-    /**
-     * 标题正常时的颜色
-     */
-    private static final int COLOR_TEXT_NORMAL = 0x333333;
-    /**
-     * 标题选中时的颜色
-     */
-    private static final int COLOR_TEXT_HIGHLIGHTCOLOR = 0xEE8600;
-
     private int lineColor = 0x00000000;//中间的线默认透明
 
-    private int selectedColor = 0xFFEE8600;//中间的线默认透明
+    private int textColor = 0xFF333333;//默认字体颜色
+
+    private int selectedTextColor = 0xFFEE8600;//文字选中颜色
+
+    private int textSize = 18;//默认大小
+
+    private int selected_textSize = 18;//默认大小
 
     private Rect rect;
 
     private LinearLayout linearLayout;
-
-    private String TAG = this.getClass().getSimpleName();
 
     private ValueAnimator animator;//滑动动画
 
@@ -136,9 +129,15 @@ public class SimpleIndicator extends HorizontalScrollView {
 
         indicatorColor = a.getColor(R.styleable.ViewPagerIndicator_indicator_color, indicatorColor);
 
-        lineColor = a.getColor(R.styleable.ViewPagerIndicator_line_color, lineColor);
+        lineColor = a.getColor(R.styleable.ViewPagerIndicator_line_color, lineColor);//书分割线颜色
 
-        selectedColor = a.getColor(R.styleable.ViewPagerIndicator_selected_text_color, selectedColor);
+        textColor = a.getColor(R.styleable.ViewPagerIndicator_text_color, textColor);//字体默认颜色
+
+        selectedTextColor = a.getColor(R.styleable.ViewPagerIndicator_selected_text_color, selectedTextColor);//选中字体颜色
+
+        textSize = a.getInt(R.styleable.ViewPagerIndicator_text_size, textSize);//默认文字大小
+
+        selected_textSize = a.getInt(R.styleable.ViewPagerIndicator_selected_text_size, selected_textSize);//选中字体大小
 
         if (mTabVisibleCount < 0) mTabVisibleCount = COUNT_DEFAULT_TAB;
 
@@ -285,6 +284,8 @@ public class SimpleIndicator extends HorizontalScrollView {
 
                 highLightTextView(position * 2);
 
+                if (null != clickListener) clickListener.onClick(position);//获取当前位置
+
                 // 回调
                 if (onPageChangeListener != null) {
 
@@ -295,6 +296,15 @@ public class SimpleIndicator extends HorizontalScrollView {
 
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                if (getScrollX() == 0 && position > mTabVisibleCount) {//当初始位置超过可见数量时，不同的积分竞猜显示对应的记录界面
+
+                    position = position - 1;
+
+                    positionOffset = 1.0f;
+
+                }
+
                 // 滚动
                 scroll(position, positionOffset);
 
@@ -336,7 +346,9 @@ public class SimpleIndicator extends HorizontalScrollView {
 
         if (view instanceof TextView) {
 
-            ((TextView) view).setTextColor(selectedColor);
+            ((TextView) view).setTextSize(TypedValue.COMPLEX_UNIT_SP, selected_textSize);
+
+            ((TextView) view).setTextColor(selectedTextColor);
 
         }
 
@@ -353,7 +365,9 @@ public class SimpleIndicator extends HorizontalScrollView {
 
             if (view instanceof TextView) {
 
-                ((TextView) view).setTextColor(Color.parseColor("#333333"));
+                ((TextView) view).setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
+
+                ((TextView) view).setTextColor(textColor);
             }
         }
     }
@@ -379,7 +393,7 @@ public class SimpleIndicator extends HorizontalScrollView {
 
                         if (j == mViewPager.getCurrentItem()) return;
 
-                        mViewPager.setCurrentItem(j);
+                        mViewPager.setCurrentItem(j, true);
 
                     } else {
 
@@ -429,11 +443,11 @@ public class SimpleIndicator extends HorizontalScrollView {
 
         tv.setGravity(Gravity.CENTER);
 
-        tv.setTextColor(Color.parseColor("#333333"));
+        tv.setTextColor(textColor);
 
         tv.setText(text);
 
-        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
 
         tv.setLayoutParams(lp);
 

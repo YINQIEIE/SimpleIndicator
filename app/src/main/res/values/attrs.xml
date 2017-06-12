@@ -3,9 +3,12 @@
 
     <declare-styleable name="ViewPagerIndicator">
         <attr name="item_count" format="integer" />
-        <attr name="indicator_color" format="color|reference" />
+        <attr name="indicator_color" format="color" />
         <attr name="line_color" format="color" />
+        <attr name="text_color" format="color|reference" />
+        <attr name="text_size" format="integer|reference" />
         <attr name="selected_text_color" format="color|reference" />
+        <attr name="selected_text_size" format="integer|reference" />
     </declare-styleable>
 
 </resources>
